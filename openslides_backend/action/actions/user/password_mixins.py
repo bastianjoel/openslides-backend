@@ -6,6 +6,7 @@ from openslides_backend.shared.patterns import fqid_from_collection_and_id
 from ....shared.exceptions import ActionException
 from ...action import Action
 from ...util.typing import ActionData
+import argon2
 
 
 class SetPasswordMixin(Action):
@@ -32,7 +33,9 @@ class SetPasswordMixin(Action):
             )
 
         password = instance.pop("password")
-        instance["password"] = self.auth.hash(password)
+        ph = argon2.PasswordHasher(time_cost=1, memory_cost=256, parallelism=4, hash_len=32)
+        instance["password"] = ph.hash(password)
+
         if instance.pop("set_as_default", False):
             instance["default_password"] = password
 

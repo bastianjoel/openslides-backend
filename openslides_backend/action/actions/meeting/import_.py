@@ -450,7 +450,8 @@ class MeetingImport(
         for entry in json_data.get("user", {}).values():
             if entry["id"] not in self.merge_user_map:
                 entry["default_password"] = get_random_password()
-                entry["password"] = self.auth.hash(entry["default_password"])
+                ph = argon2.PasswordHasher(time_cost=1, memory_cost=256, parallelism=4, hash_len=32)
+                entry["password"] = ph.hash(entry["default_password"])
 
         # set enable_anonymous
         meeting["enable_anonymous"] = False

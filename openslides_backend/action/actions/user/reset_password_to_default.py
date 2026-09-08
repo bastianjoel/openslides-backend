@@ -11,6 +11,7 @@ from ...generics.update import UpdateAction
 from ...util.default_schema import DefaultSchema
 from ...util.register import register_action
 from .password_mixins import ClearSessionsMixin
+import argon2
 
 
 class UserResetPasswordToDefaultMixin(
@@ -30,7 +31,9 @@ class UserResetPasswordToDefaultMixin(
             raise ActionException(
                 f"user {user['saml_id']} is a Single Sign On user and has no local OpenSlides password."
             )
-        default_password = self.auth.hash(str(user.get("default_password")))
+        ph = argon2.PasswordHasher(time_cost=1, memory_cost=256, parallelism=4, hash_len=32)
+        default_password = ph.hash(str(user.get("default_password")))
+
         instance["password"] = default_password
         return instance
 
